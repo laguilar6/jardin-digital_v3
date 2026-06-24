@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[e][s][t][a][r]_[e][n]_[c][o][m][ú][n]</title>
+    <style>
+        /* Variables globales con esquema de tres estados */
+        :root {
+            --bg: #ffffff;
+            --text: #000000;
+            --border: #000000;
+            --surface: #f4f4f4;
+            --accent: #555555;
+            --font-main: 'Courier New', Courier, monospace;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            height: 100vh;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        /* Barra Superior Fija */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            border-bottom: 2px solid var(--border);
+            background-color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        .top-left, .top-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--surface);
+        }
+
+        .phrases-ticker {
+            font-size: 0.85rem;
+            font-style: italic;
+            color: var(--accent);
+            text-align: center;
+            max-width: 40%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Barra Lateral Fija */
+        .sidebar {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            width: 200px;
+            height: calc(100vh - 50px);
+            border-right: 2px solid var(--border);
+            background-color: var(--bg);
+            display: flex;
+            flex-direction: column;
+            z-index: 90;
+        }
+
+        .format-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            font-family: var(--font-main);
+            font-size: 1rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .format-btn:last-child {
+            border-bottom: none;
+        }
+
+        .format-btn:hover {
+            background-color: var(--surface);
+        }
+
+        .format-icon {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Cuerpo Principal de la Web */
+        .main-container {
+            position: absolute;
+            top: 50px;
+            left: 200px;
+            width: calc(100vw - 200px);
+            height: calc(100vh - 50px);
+            overflow-y: auto;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Encabezados Persistentes en el Generador */
+        .persistent-header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .editable-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: inline-block;
+            outline: none;
+            border-bottom: 1px dashed var(--accent);
+            padding-right: 5px;
+        }
+
+        .persistent-subtitle {
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+
+        /* Vistas dinámicas */
+        .view-section {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Vista Home */
+        #view-home {
+            max-width: 650px;
+            text-align: left;
+        }
+        #view-home h2 { margin-bottom: 15px; font-size: 1.5rem; display: flex; align-items: center; }
+        #view-home p { margin-bottom: 15px; font-size: 1rem; }
+        .quote-block {
+            border-left: 3px solid var(--border);
+            padding-left: 15px;
+            margin: 25px 0;
+            font-style: italic;
+        }
+
+        /* Área de Resultados del Generador */
+        .generator-card {
+            border: 1px dashed var(--border);
+            background-color: var(--surface);
+            padding: 25px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .metadata-box {
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .meta-line {
+            margin-bottom: 6px;
+            border-bottom: 1px solid var(--surface);
+        }
+
+        .meta-label {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .media-preview-box {
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .media-preview-box img {
+            max-width: 100%;
+            max-height: 350px;
+            object-fit: contain;
+            cursor: zoom-in;
+            transition: transform 0.2s;
+        }
+
+        .media-preview-box img.zoomed {
+            cursor: zoom-out;
+            transform: scale(1.8);
+            max-height: 90vh;
+        }
+
+        .media-preview-box audio {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .text-placeholder, .video-placeholder {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+
+        .action-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .action-link {
+            display: inline-block;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            padding: 8px 16px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .action-link:hover {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .download-instruction-link {
+            color: var(--text);
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Vista Repositorio */
+        .repo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .repo-item {
+            border: 1px solid var(--border);
+            background-color: var(--surface);
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .repo-item:hover {
+            background-color: var(--text);
+            color: var(--bg);
+        }
+
+        .repo-footer {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        /* Vista Detalle de Obra Repositorio */
+        .repo-detail-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+
+        .repo-detail-meta {
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        .repo-detail-preview {
+            flex: 1;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .repo-detail-preview img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Paneles Modales y Desplegables (Derecha/Centro) */
+        .side-panel {
+            position: fixed;
+            top: 50px;
+            right: -100%;
+            width: 450px;
+            height: calc(100vh - 50px);
+            background-color: var(--bg);
+            border-left: 2px solid var(--border);
+            z-index: 120;
+            transition: right 0.3s ease;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .side-panel.open {
+            right: 0;
+        }
+
+        .panel-close {
+            display: block;
+            margin-bottom: 20px;
+            text-align: right;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--bg);
+            color: var(--text);
+            border: 2px solid var(--border);
+            font-family: var(--font-main);
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .modal-content a {
+            color: var(--text);
+            text-decoration: underline;
+        }
+
+        .resources-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .resources-list li {
+            margin-bottom: 14px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--surface);
+        }
+
+        .resources-list li:last-child {
+            border-bottom: none;
+        }
+
+        .resources-list .resource-desc {
+            color: var(--accent);
+            font-size: 0.8rem;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .modal-content h3 {
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+
+        /* Utilidades generales */
+        .text-block-compact {
+            white-space: pre-line;
+        }
+
+        .link-interno {
+            color: var(--text);
+            font-weight: bold;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="top-left">
+            <button class="nav-btn" onclick="openHome()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256"><path d="M183.59,213.47a8,8,0,0,1-15.18,5.06l-8-24a8,8,0,0,1,15.18-5.06ZM128,184a8,8,0,0,0-8,8v32a8,8,0,0,0,16,0V192A8,8,0,0,0,128,184Zm-37.47.41a8,8,0,0,0-10.12,5.06l-8,24a8,8,0,0,0,15.18,5.06l8-24A8,8,0,0,0,90.53,184.41ZM248,112c0,16.22-13.37,30.89-37.65,41.29C188.22,162.78,159,168,128,168s-60.22-5.22-82.35-14.71C21.37,142.89,8,128.22,8,112c0-8.37,3.67-20.79,21.17-32.5,11.37-7.61,26.94-13.76,45.18-17.85A63.64,63.64,0,0,1,173,50.45a64.84,64.84,0,0,1,9.11,11.3C223.43,71.09,248,89.74,248,112ZM80,96.83v3a7.92,7.92,0,0,0,6.13,7.76A188.24,188.24,0,0,0,128,112a188.09,188.09,0,0,0,41.85-4.37A7.93,7.93,0,0,0,176,99.87V96a48,48,0,0,0-48.64-48C101.25,48.34,80,70.25,80,96.83ZM232,112c0-11.7-16.63-23.89-41.9-31.59A64.68,64.68,0,0,1,192,96v3.92a23.86,23.86,0,0,1-18.56,23.3A204.05,204.05,0,0,1,128,128a204.15,204.15,0,0,1-45.44-4.78A23.86,23.86,0,0,1,64,99.92h0V96.86a65.28,65.28,0,0,1,2.13-16.52C40.72,88,24,100.25,24,112c0,18.92,42.71,40,104,40S232,130.92,232,112Z"></path></svg>Home</button>
+            <button class="nav-btn" onclick="openRepository()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256"><path d="M224,48H32A16,16,0,0,0,16,64V88a16,16,0,0,0,16,16v88a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V104a16,16,0,0,0,16-16V64A16,16,0,0,0,224,48ZM208,192H48V104H208ZM224,88H32V64H224V88ZM96,136a8,8,0,0,1,8-8h48a8,8,0,0,1,0,16H104A8,8,0,0,1,96,136Z"></path></svg>Repositorio</button>
+            <button class="nav-btn" onclick="toggleResourcesModal(true)"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256"><path d="M224,64H176V56a24,24,0,0,0-24-24H104A24,24,0,0,0,80,56v8H32A16,16,0,0,0,16,80V192a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V80A16,16,0,0,0,224,64ZM96,56a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96ZM224,80v32H192v-8a8,8,0,0,0-16,0v8H80v-8a8,8,0,0,0-16,0v8H32V80Zm0,112H32V128H64v8a8,8,0,0,0,16,0v-8h96v8a8,8,0,0,0,16,0v-8h32v64Z"></path></svg>Recursos</button>
+        </div>
+        <div class="phrases-ticker" id="ticker-text">- Cargando fragmentos de realidad...</div>
+        <div class="top-right">
+            <button class="nav-btn" onclick="cycleColorMode()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256"><path d="M200.77,53.89A103.27,103.27,0,0,0,128,24h-1.07A104,104,0,0,0,24,128c0,43,26.58,79.06,69.36,94.17A32,32,0,0,0,136,192a16,16,0,0,1,16-16h46.21a31.81,31.81,0,0,0,31.2-24.88,104.43,104.43,0,0,0,2.59-24A103.28,103.28,0,0,0,200.77,53.89Zm13,93.71A15.89,15.89,0,0,1,198.21,160H152a32,32,0,0,0-32,32,16,16,0,0,1-21.31,15.07C62.49,194.3,40,164,40,128a88,88,0,0,1,87.09-88h.9a88.35,88.35,0,0,1,88,87.25A88.86,88.86,0,0,1,213.81,147.6ZM140,76a12,12,0,1,1-12-12A12,12,0,0,1,140,76ZM96,100A12,12,0,1,1,84,88,12,12,0,0,1,96,100Zm0,56a12,12,0,1,1-12-12A12,12,0,0,1,96,156Zm88-56a12,12,0,1,1-12-12A12,12,0,0,1,184,100Z"></path></svg></button>
+            <button class="nav-btn" onclick="toggleTermsPanel(true)"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256"><path d="M248,120a48.05,48.05,0,0,0-48-48H160.2c-2.91-.17-53.62-3.74-101.91-44.24A16,16,0,0,0,32,40V200a16,16,0,0,0,26.29,12.25c37.77-31.68,77-40.76,93.71-43.3v31.72A16,16,0,0,0,159.12,214l11,7.33A16,16,0,0,0,194.5,212l11.77-44.36A48.07,48.07,0,0,0,248,120ZM48,199.93V40h0c42.81,35.91,86.63,45,104,47.24v65.48C134.65,155,90.84,164.07,48,199.93Zm131,8,0,.11-11-7.33V168h21.6ZM200,152H168V88h32a32,32,0,1,1,0,64Z"></path></svg>Términos y Condiciones</button>
+            <button class="nav-btn" onclick="closeBrowserTab()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg></button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <button class="format-btn" onclick="triggerFetch('image')">
+            <span class="format-icon"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M110.66,147.56a8,8,0,0,0-13.32,0L76.49,178.85l-9.76-15.18a8,8,0,0,0-13.46,0l-36,56A8,8,0,0,0,24,232H152a8,8,0,0,0,6.66-12.44ZM38.65,216,60,182.79l9.63,15a8,8,0,0,0,13.39.11l21-31.47L137.05,216Zm175-133.66-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40v88a8,8,0,0,0,16,0V40h88V88a8,8,0,0,0,8,8h48V216h-8a8,8,0,0,0,0,16h8a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160Z"></path></svg></span>
+            <span>imagen</span>
+        </button>
+        <button class="format-btn" onclick="triggerFetch('texts')">
+            <span class="format-icon"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M48,120a8,8,0,0,0,8-8V40h88V88a8,8,0,0,0,8,8h48v16a8,8,0,0,0,16,0V88a8,8,0,0,0-2.34-5.66l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40v72A8,8,0,0,0,48,120ZM160,51.31,188.69,80H160Zm-5.49,105.34L137.83,180l16.68,23.35a8,8,0,0,1-13,9.3L128,193.76l-13.49,18.89a8,8,0,1,1-13-9.3L118.17,180l-16.68-23.35a8,8,0,1,1,13-9.3L128,166.24l13.49-18.89a8,8,0,0,1,13,9.3ZM92,152a8,8,0,0,1-8,8H72v48a8,8,0,0,1-16,0V160H44a8,8,0,0,1,0-16H84A8,8,0,0,1,92,152Zm128,0a8,8,0,0,1-8,8H200v48a8,8,0,0,1-16,0V160H172a8,8,0,0,1,0-16h40A8,8,0,0,1,220,152Z"></path></svg></span>
+            <span>texto</span>
+        </button>
+        <button class="format-btn" onclick="triggerFetch('video')">
+            <span class="format-icon"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40v72a8,8,0,0,0,16,0V40h88V88a8,8,0,0,0,8,8h48V216h-8a8,8,0,0,0,0,16h8a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM155.88,145a8,8,0,0,0-8.12.22l-19.95,12.46A16,16,0,0,0,112,144H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h64a16,16,0,0,0,15.81-13.68l19.95,12.46A8,8,0,0,0,160,216V152A8,8,0,0,0,155.88,145ZM112,208H48V160h64v48Zm32-6.43-16-10V176.43l16-10Z"></path></svg></span>
+            <span>video</span>
+        </button>
+        <button class="format-btn" onclick="triggerFetch('audio')">
+            <span class="format-icon"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M99.06,128.61a8,8,0,0,0-8.72,1.73L68.69,152H48a8,8,0,0,0-8,8v40a8,8,0,0,0,8,8H68.69l21.65,21.66A8,8,0,0,0,104,224V136A8,8,0,0,0,99.06,128.61ZM88,204.69,77.66,194.34A8,8,0,0,0,72,192H56V168H72a8,8,0,0,0,5.66-2.34L88,155.31ZM152,180a40.55,40.55,0,0,1-20,34.91A8,8,0,0,1,124,201.09a24.49,24.49,0,0,0,0-42.18A8,8,0,0,1,132,145.09,40.55,40.55,0,0,1,152,180Zm61.66-97.66-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40v80a8,8,0,0,0,16,0V40h88V88a8,8,0,0,0,8,8h48V216H168a8,8,0,0,0,0,16h32a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160Z"></path></svg></span>
+            <span>audio</span>
+        </button>
+    </div>
+
+    <div class="main-container">
+
+        <div class="persistent-header" id="generator-header" style="display:none;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;">
+                <div class="editable-title" contenteditable="true" id="main-title" style="margin-bottom: 0;">[e][s][t][a][r]_[e][n]_[c][o][m][ú][n]</div>
+                <span style="font-size: 1.2rem; opacity: 0.7; display: inline-flex; align-items: center;" title="Hacé click en el título para editarlo"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z"></path></svg></span>
+            </div>
+            <div class="persistent-subtitle">← Seleccioná un formato para obtener una pieza aleatoria de Archive.org y transformarla.</div>
+        </div>
+
+        <div id="view-home" class="view-section active">
+            <h2><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" style="vertical-align: middle; margin-right: 6px;"><path d="M247.63,47.89a8,8,0,0,0-7.52-7.52c-51.76-3-93.32,12.74-111.18,42.22-11.8,19.49-11.78,43.16-.16,65.74a71.34,71.34,0,0,0-14.17,27L98.33,159c7.82-16.33,7.52-33.35-1-47.49-13.2-21.79-43.67-33.47-81.5-31.25a8,8,0,0,0-7.52,7.52c-2.23,37.83,9.46,68.3,31.25,81.5A45.82,45.82,0,0,0,63.44,176,54.58,54.58,0,0,0,87,170.33l25,25V224a8,8,0,0,0,16,0V194.51a55.61,55.61,0,0,1,12.27-35,73.91,73.91,0,0,0,33.31,8.4,60.9,60.9,0,0,0,31.83-8.86C234.89,141.21,250.67,99.65,247.63,47.89ZM47.81,155.6C32.47,146.31,23.79,124.32,24,96c28.32-.24,50.31,8.47,59.6,23.81,4.85,8,5.64,17.33,2.46,26.94L61.65,122.34a8,8,0,0,0-11.31,11.31l24.41,24.41C65.14,161.24,55.82,160.45,47.81,155.6Zm149.31-10.22c-13.4,8.11-29.15,8.73-45.15,2l53.69-53.7a8,8,0,0,0-11.31-11.31L140.65,136c-6.76-16-6.15-31.76,2-45.15,13.94-23,47-35.82,89.33-34.83C232.94,98.34,220.14,131.44,197.12,145.38Z"></path></svg>Bienvenidxs al Jardín Digital</h2>
+            <div class="text-block-compact">Hola, soy Leila. Soy estudiante de artes digitales, una artista en proceso y una entusiasta de las páginas colaborativas. Este jardín nace como un punto de encuentro entre personas y las ideas que flotan en el universo.
+            Aquí podés tomar una obra de internet — una imagen, un texto, un video o un sonido — y transformarla en algo nuevo. No importa si sos artista o no; lo que importa es la intención de hacer crecer.
+            Espero te puedas sumar a esta actividad en este jardín digital.
+            <span style="display:inline-flex; align-items:center; gap:4px; margin-top:10px;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm8-128a8,8,0,0,1-16,0,8,8,0,0,1,16,0Zm-8,24a8,8,0,0,0-8,8v40a8,8,0,0,0,16,0V120A8,8,0,0,0,128,112Z"></path></svg> <strong>Todo es anti‑copyright, colaborativo y gratuito.</strong></span>
+            <span style="display:block; margin-top:10px;"> Ejemplo de obra digital intervenida: <span class="link-interno" onclick="openRepoDetail(1)">Remix_01_canvas (laguilar6)</span></span>
+            </div>
+        </div>
+
+        <div id="view-generator" class="view-section">
+            <div class="generator-card">
+                <div class="metadata-box">
+                    <div class="meta-line"><span class="meta-label">Título:</span> <span id="meta-title">-</span></div>
+                    <div class="meta-line"><span class="meta-label">Creado por:</span> <span id="meta-author">-</span></div>
+                    <div class="meta-line"><span class="meta-label">Tópicos:</span> <span id="meta-topics">-</span></div>
+                </div>
+
+                <div class="media-preview-box" id="media-preview-container">
+                    </div>
+
+                <div class="action-container">
+                    <a id="btn-view-original" class="action-link" target="_blank" href="#">Ver original</a>
+                </div>
+
+                <div style="font-size: 0.85rem; border-top: 1px solid var(--border); padding-top: 15px;">
+                    <strong>INSTRUCCIONES:</strong> Descargá esta pieza, intervenila con tus herramientas favoritas y compartí el resultado. 
+                    <span class="download-instruction-link" onclick="executeDownloadTxt()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"></path></svg></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-repository" class="view-section">
+            <h2 style="text-align: center; font-size: 1.4rem; text-transform: uppercase; margin-bottom: 10px;">Repositorio de obras digitales</h2>
+            <p style="text-align: center; font-size: 0.85rem; color: var(--accent); margin-bottom: 20px;">Listado de obras de participantes. Seleccioná una para ver su mutación.</p>
+            
+            <div class="repo-grid" id="repo-items-container">
+                </div>
+
+            <div class="repo-footer">
+                <button class="nav-btn" style="font-weight: bold;" onclick="selectRandomRepoItem()">| Aleatorio |</button>
+            </div>
+        </div>
+
+        <div id="view-repo-detail" class="view-section">
+            <h2 style="font-size: 1.3rem; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 5px;">Repositorio de obras digitales</h2>
+            
+            <div class="repo-detail-layout">
+                <div class="repo-detail-meta">
+                    <div class="meta-line" style="margin-bottom:12px;"><span class="meta-label">Título:</span> <span id="detail-title">-</span></div>
+                    <div class="meta-line" style="margin-bottom:12px;"><span class="meta-label">Creado por:</span> <span id="detail-author">-</span></div>
+                    <div class="meta-line" style="margin-bottom:12px;"><span class="meta-label">Tópicos:</span> <span id="detail-topics">-</span></div>
+                    <div class="meta-line" style="margin-bottom:12px;"><span class="meta-label">Pieza original:</span> <a id="detail-original-link" target="_blank" style="color: var(--text);" href="#">url.com</a></div>
+                    <p id="detail-desc" style="font-size:0.85rem; margin-top:15px; font-style:italic; color:var(--accent);"></p>
+                </div>
+                <div class="repo-detail-preview" id="detail-preview-container">
+                    </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px;">
+                <button class="nav-btn" onclick="openRepository()">| Volver |</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="side-panel" id="panel-terms">
+        <span class="panel-close" onclick="toggleTermsPanel(false)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M216,40H68.53a16.08,16.08,0,0,0-13.72,7.77L9.14,123.88a8,8,0,0,0,0,8.24l45.67,76.11A16.08,16.08,0,0,0,68.53,216H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM61.67,204.12,68.53,200h0ZM216,200H68.53l-43.2-72,43.2-72H216ZM106.34,146.34,124.69,128l-18.35-18.34a8,8,0,0,1,11.32-11.32L136,116.69l18.34-18.35a8,8,0,0,1,11.32,11.32L147.31,128l18.35,18.34a8,8,0,0,1-11.32,11.32L136,139.31l-18.34,18.35a8,8,0,0,1-11.32-11.32Z"></path></svg></span>
+        <h3 style="font-size: 1.1rem; text-transform: uppercase; margin-bottom: 15px;">Términos y Condiciones</h3>
+        
+        <p style="font-size: 0.85rem; margin-bottom: 15px; font-weight: bold; text-decoration: underline;">Humanos:</p>
+        <p style="font-size: 0.85rem; margin-bottom: 20px;">Sos libre de tomar cualquier pieza de este jardín, romperla, transformarla y hacer arte digital con ella. No necesitás pedirle permiso a nadie ni pagar regalías. Este es un espacio común abierto para el intercambio libre y comunitario. Compartí lo que hagas y ayudanos a poblar el repositorio.</p>
+        
+        <p style="font-size: 0.85rem; margin-bottom: 15px; font-weight: bold; text-decoration: underline;">Declaración Legal::</p>
+        <p style="font-size: 0.8rem; color: var(--accent); margin-bottom: 15px;">Se otorga permiso para compartir, copiar, distribute, ejecutar y remezclar libremente las obras aquí contenidas bajo la condición estricta de mantener la libertad absoluta de todas las obras derivadas en el campo común. Las corporaciones comerciales de propiedad privada y monopólica quedan excluidas de la explotación comercial directa de estos bienes comunes sin el consentimiento explícito y asambleario de la comunidad unificada de jardineros.</p>
+        <p style="font-size: 0.8rem;"><a id="external-legal-link" href="https://endefensadelsl.org/ppl_deed_es.html" target="_blank" style="color: var(--text); font-weight:bold;">Ver Escritura Completa de la PPL</a></p>
+    </div>
+
+    <div class="modal-overlay" id="modal-resources" onclick="toggleResourcesModal(false)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="panel-close" style="color: var(--text);" onclick="toggleResourcesModal(false)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg></span>
+            <h3>Recursos</h3>
+            <ul class="resources-list">
+                <li><span><strong>Archive.org</strong> <span class="resource-desc">Piezas base (imágenes, textos, videos, sonidos). 🔗</span></span></li>
+                <li><span><strong>Pixelbuddha</strong> <span class="resource-desc">Fuentes, efectos, gráficos y pinceles gratis. 🔗</span></span></li>
+                <li><span><strong>Copychar.cc</strong> <span class="resource-desc">Copiar y pegar caracteres especiales. 🔗</span></span></li>
+                <li><span><strong>Texturelabs.org</strong> <span class="resource-desc">Base gigante de texturas gratuitas. 🔗</span></span></li>
+                <li><span><strong>Vecteezy</strong> <span class="resource-desc">Vectores y recursos gráficos limpios. 🔗</span></span></li>
+                <li><span><strong>Pixabay</strong> <span class="resource-desc">Videos, fotografías y música libre. 🔗</span></span></li>
+                <li><span><strong>Free Music Archive</strong> <span class="resource-desc">Recursos sonoros independientes. 🔗</span></span></li>
+                <li><span><strong>Bensound</strong> <span class="resource-desc">Música libre de derechos para videos. 🔗</span></span></li>
+                <li><span><strong>FreeSFX</strong> <span class="resource-desc">Efectos de sonido e impactos de audio sfx. 🔗</span></span></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Ticker de frases aleatorias
+        const frasesTicker = [
+            "- La originalidad no existe, solo lo auténtico. — Helene Hegemann",
+            "- Todo artista que posea ese nombre necesita, desesperadamente, utilizar la tecnología de su época. — Peter Greenaway",
+            "- Esta sociedad malinterpreta el arte porque está fascinada con el artista. — Ernesto Castro",
+            "- El arte es un modo de registrar e intervenir los acontecimientos vividos. — M. V. Pardo"
+        ];
+        
+        setInterval(() => {
+            const index = Math.floor(Math.random() * frasesTicker.length);
+            document.getElementById('ticker-text').innerText = frasesTicker[index];
+        }, 5000);
+
+        // Control de Paleta de Colores de 3 Estados (Claro, Oscuro, Aleatorio Brutal)
+        let colorState = 0; 
+        
+        const brutalPalettes = [
+            { bg: '#f1faee', text: '#1d3557', border: '#1d3557', surface: '#a8dadc', accent: '#457b9d' },
+            { bg: '#fefae0', text: '#283618', border: '#283618', surface: '#dda15e', accent: '#606c38' },
+            { bg: '#e0f2fe', text: '#0f172a', border: '#0f172a', surface: '#bae6fd', accent: '#0284c7' },
+            { bg: '#fae8ff', text: '#581c87', border: '#581c87', surface: '#f5d0fe', accent: '#a21caf' }
+        ];
+
+        function cycleColorMode() {
+            colorState = (colorState + 1) % 3;
+            const root = document.documentElement;
+
+            if (colorState === 0) {
+                // Modo Claro Minimalista
+                root.style.setProperty('--bg', '#ffffff');
+                root.style.setProperty('--text', '#000000');
+                root.style.setProperty('--border', '#000000');
+                root.style.setProperty('--surface', '#f4f4f4');
+                root.style.setProperty('--accent', '#555555');
+            } else if (colorState === 1) {
+                // Modo Oscuro Común
+                root.style.setProperty('--bg', '#121212');
+                root.style.setProperty('--text', '#e5e5e5');
+                root.style.setProperty('--border', '#444444');
+                root.style.setProperty('--surface', '#1e1e1e');
+                root.style.setProperty('--accent', '#888888');
+            } else if (colorState === 2) {
+                // Modo Aleatorio Brutalista Curado
+                const randomPalette = brutalPalettes[Math.floor(Math.random() * brutalPalettes.length)];
+                root.style.setProperty('--bg', randomPalette.bg);
+                root.style.setProperty('--text', randomPalette.text);
+                root.style.setProperty('--border', randomPalette.border);
+                root.style.setProperty('--surface', randomPalette.surface);
+                root.style.setProperty('--accent', randomPalette.accent);
+            }
+        }
+
+        // Sistema de navegación de vistas del contenedor
+        function deactivateAllViews() {
+            document.querySelectorAll('.view-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById('generator-header').style.display = 'none';
+        }
+
+        function openHome() {
+            deactivateAllViews();
+            document.getElementById('view-home').classList.add('active');
+        }
+
+        function openRepository() {
+            deactivateAllViews();
+            document.getElementById('view-repository').classList.add('active');
+        }
+
+        // Control de Paneles Flotantes y Modales
+        function toggleTermsPanel(open) {
+            const panel = document.getElementById('panel-terms');
+            if (open) panel.classList.add('open');
+            else panel.classList.remove('open');
+        }
+
+        function toggleResourcesModal(open) {
+            const modal = document.getElementById('modal-resources');
+            if (open) modal.style.display = 'flex';
+            else modal.style.display = 'none';
+        }
+
+        function closeBrowserTab() {
+            window.close();
+            alert("Este botón está programado para cerrar la pestaña interna del navegador via window.close().");
+        }
+
+        // LÓGICA DE LA API DE ARCHIVE.ORG Y FILTRADOS
+        const historialVistos = { autores: [], paises: [], idiomas: [] };
+        let activeItem = null; 
+
+        async function triggerFetch(tipo) {
+            deactivateAllViews();
+            document.getElementById('generator-header').style.display = 'block';
+            
+            const viewGenerator = document.getElementById('view-generator');
+            viewGenerator.classList.add('active');
+
+            const metaTitle = document.getElementById('meta-title');
+            const metaAuthor = document.getElementById('meta-author');
+            const metaTopics = document.getElementById('meta-topics');
+            const mediaContainer = document.getElementById('media-preview-container');
+
+            metaTitle.innerText = "Interrogando la base de datos de la cultura libre...";
+            metaAuthor.innerText = "-";
+            metaTopics.innerText = "-";
+            mediaContainer.innerHTML = "";
+
+            const titleEl = document.getElementById('main-title');
+            titleEl.style.opacity = '0.4';
+
+            let tipoQuery = tipo;
+            if (tipo === 'video') tipoQuery = 'movies';
+            const topicsPermitidos = '(subject:"art" OR subject:"science" OR subject:"comic" OR subject:"women" OR subject:"feminism" OR subject:"men" OR subject:"politics" OR subject:"childhood" OR subject:"family" OR subject:"school" OR subject:"Art appreciation")';
+            const exclusionesEsteticas = '-subject:"portrait" -subject:"logo" -portrait -logo -collection:internetarchivebooks -mediatype:metadata';
+            const exclusionLicenciaBy = '-licenseurl:*by*';
+            const query = `mediatype:${tipoQuery} AND ${topicsPermitidos} AND ${exclusionesEsteticas} AND ${exclusionLicenciaBy}`;
+            const campos = 'identifier,title,creator,subject,language,coverage';
+            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=${campos}&rows=75&output=json`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                titleEl.style.opacity = '1';
+
+                if (!data.response || !data.response.docs || data.response.docs.length === 0) {
+                    metaTitle.innerText = "El éter está en silencio. No se encontraron resultados. Intentá de nuevo.";
+                    return;
+                }
+
+                const docs = data.response.docs;
+                const docsMezclados = docs.sort(() => Math.random() - 0.5);
+                let itemSeleccionado = null;
+
+                for (let doc of docsMezclados) {
+                    const autor = doc.creator || 'Anónimx';
+                    const pais = doc.coverage || 'Desconocido';
+                    const idioma = doc.language || 'Indeterminado';
+
+                    if (!historialVistos.autores.includes(autor) && !historialVistos.paises.includes(pais) && !historialVistos.idiomas.includes(idioma)) {
+                        itemSeleccionado = doc;
+                        historialVistos.autores.push(autor);
+                        historialVistos.paises.push(pais);
+                        historialVistos.idiomas.push(idioma);
+
+                        if(historialVistos.autores.length > 5) {
+                            historialVistos.autores.shift();
+                            historialVistos.paises.shift();
+                            historialVistos.idiomas.shift();
+                        }
+                        break;
+                    }
+                }
+
+                if (!itemSeleccionado) itemSeleccionado = docsMezclados[0];
+                activeItem = itemSeleccionado;
+
+                metaTitle.innerText = itemSeleccionado.title || "Obra sin título";
+                metaAuthor.innerText = itemSeleccionado.creator || "Autoría desconocida";
+                let topicsStr = "Cultura Libre";
+                if (itemSeleccionado.subject) {
+                    const arr = Array.isArray(itemSeleccionado.subject) ? itemSeleccionado.subject : [itemSeleccionado.subject];
+                    topicsStr = arr.slice(0, 5).join(", ");
+                }
+                metaTopics.innerText = topicsStr;
+
+                document.getElementById('btn-view-original').href = `https://archive.org/details/${itemSeleccionado.identifier}`;
+
+                if (tipo === 'image') {
+                    mediaContainer.innerHTML = `<img src="https://archive.org/services/img/${itemSeleccionado.identifier}" alt="Brote del Jardín" onclick="toggleZoom(this)">`;
+                } else if (tipo === 'audio') {
+                    mediaContainer.innerHTML = `
+                    <audio controls>
+                        <source src="https://archive.org/download/${itemSeleccionado.identifier}/${itemSeleccionado.identifier}.mp3" type="audio/mpeg">
+                        Tu navegador no soporta streaming directo.
+                    </audio>`;
+                } else if (tipo === 'video') {
+                    mediaContainer.innerHTML = `
+                    <div class="video-placeholder">
+                        📺 [Archivo de Video Detectado]<br>
+                        Archive.org requiere visualización en su ecosistema nativo para metrajes antiguos.<br>
+                        Hacé click en "Ver original" para extraer sus fragmentos de película.
+                    </div>`;
+                } else {
+                    mediaContainer.innerHTML = `
+                    <div class="text-placeholder">
+                        📄 [Documentación de Texto o Revista Digitalizada]<br>
+                        Material listo para recontextualización tipográfica y lectura libre.
+                    </div>`;
+                }
+
+            } catch (err) {
+                titleEl.style.opacity = '1';
+                metaTitle.innerText = "Interrupción en la red. Probá nuevamente.";
+                console.error(err);
+            }
+        }
+
+        function toggleZoom(img) {
+            img.classList.toggle('zoomed');
+        }
+
+        function executeDownloadTxt() {
+            if (!activeItem) {
+                alert("Primero debés generar una pieza usando los botones de formato de la barra lateral.");
+                return;
+            }
+
+            let topicsStr = "General / Cultura Libre";
+            if (activeItem.subject) {
+                const arr = Array.isArray(activeItem.subject) ? activeItem.subject : [activeItem.subject];
+                topicsStr = arr.join(", ");
+            }
+
+            const contenidoTxt = `Título: ${activeItem.title || 'Obra sin título'}
+Creado por: ${activeItem.creator || 'Desconocido u Obra Colectiva'}
+Tópicos: ${topicsStr}
+Link original: https://archive.org/details/${activeItem.identifier}
+
+--- INSTRUCCIONES ---
+Descargá esta pieza, intervenila con tus herramientas favoritas (digitales o artesanales) y luego compartí el resultado en nuestro Jardín Digital.
+Para compartir tu nueva obra, entrá a la sección "Repositorio" y subí tu creación.
+
+Jardín Digital — anti‑copyright, colaborativo, abierto.`;
+
+            const blob = new Blob([contenidoTxt], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${activeItem.identifier || 'pieza_jardin'}_metadatos.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // BASE DE DATOS E INTERACTIVIDAD DEL REPOSITORIO (orden invertido: del 10 al 1, y el 1 es laguilar6)
+        const mockRepoData = [
+            { id: 10, user: "(oruga_digital)", title: "Politica_Del_Boceto", artist: "Aguilar Leila", topics: "art, comic, science, appreciation", originalUrl: "https://archive.org/details/boceto_art", desc: "Superposición infinita de trazos y bocetos técnicos desclasificados.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%231f1f1f'/><text x='10' y='100' fill='white' font-family='monospace'>[Overlay Sketch #10]</text></svg>" },
+            { id: 9, user: "(pixel_jardinerx)", title: "Retrato_Familiar_Corrupto", artist: "Aguilar Leila", topics: "art, childhood, family", originalUrl: "https://archive.org/details/family_portrait", desc: "Corrupción intencional de bits sobre un retrato fotográfico familiar antiguo.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%23474747'/><text x='10' y='100' fill='white' font-family='monospace'>[Corrupted Memory #9]</text></svg>" },
+            { id: 8, user: "(brot3)", title: "Apreciación_Ruidista_08", artist: "Aguilar Leila", topics: "audio, noise, science, avantgarde", originalUrl: "https://archive.org/details/noise_audio", desc: "Inyección de ruido blanco en una lección de ciencias naturales grabada en cinta.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%23383838'/><text x='10' y='100' fill='white' font-family='monospace'>[Noise Wave #8]</text></svg>" },
+            { id: 7, user: "(m0n0)", title: "Metraje_Encontrado_Escuela", artist: "Aguilar Leila", topics: "movies, childhood, school", originalUrl: "https://archive.org/details/school_movie", desc: "Ralentización extrema de un registro escolar de tiza y pizarrón.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%23252525'/><text x='10' y='100' fill='white' font-family='monospace'>[Video Loop #7]</text></svg>" },
+            { id: 6, user: "(cyber_flaneur)", title: "Feminismo_Obrero_Registro", artist: "Aguilar Leila", topics: "women, feminism, text, history", originalUrl: "https://archive.org/details/feminism_text", desc: "Aislamiento tipográfico de manifiestos olvidados de principios de siglo.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%23666'/><text x='10' y='100' fill='white' font-family='monospace'>[Text Glitch #6]</text></svg>" },
+            { id: 5, user: "(null_island)", title: "Cartografía_Disidente_1920", artist: "Aguilar Leila", topics: "maps, geography, politics", originalUrl: "https://archive.org/details/maps_disident", desc: "Re-mapeo estético borrando fronteras nacionales ficticias.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%23111'/><text x='10' y='100' fill='white' font-family='monospace'>[Map Distortion #5]</text></svg>" },
+            { id: 4, user: "(avanier)", title: "Estudio_Materia_Secundaria", artist: "Aguilar Leila", topics: "science, biology, abstract", originalUrl: "https://archive.org/details/science_book", desc: "Filtros analógicos sobre ilustraciones botánicas de Dominio Público.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%23555'/><text x='10' y='100' fill='white' font-family='monospace'>[Abstract Bio #4]</text></svg>" },
+            { id: 3, user: "(electro_pizza)", title: "Desvío_Tipográfico_Comic", artist: "Aguilar Leila", topics: "comic, text, structure, family", originalUrl: "https://archive.org/details/comic_archive", desc: "Recontextualización de viñetas históricas escolares mediante código.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%23333'/><text x='10' y='100' fill='white' font-family='monospace'>[Comic Desvío #3]</text></svg>" },
+            { id: 2, user: "(drisc)", title: "Ecos_De_Radio_Feminista", artist: "Aguilar Leila", topics: "audio, speech, modular, school", originalUrl: "https://archive.org/details/radio_brote", desc: "Superposición de voces y texturas de baja frecuencia.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%23444'/><text x='10' y='100' fill='white' font-family='monospace'>[Audio Fragment #2]</text></svg>" },
+            { id: 1, user: "(laguilar6)", title: "Remix_01_canvas", artist: "Aguilar Leila", topics: "godey's, paris, print, art, painting", originalUrl: "https://archive.org/details/Godeys_Americanized_Paris_Fashions", desc: "Intervención digital sobre grabados de moda parisina del siglo XIX. Recontextualización cromática y geométrica.", img: "https://i.ibb.co/0jhNdfVj/edit-aguilar.jpg" }
+        ];
+
+        function initRepositoryGrid() {
+            const container = document.getElementById('repo-items-container');
+            container.innerHTML = "";
+
+            // orden inverso: del id mayor al menor
+            const sorted = [...mockRepoData].sort((a,b) => b.id - a.id);
+            sorted.forEach(item => {
+                const el = document.createElement('div');
+                el.className = "repo-item";
+                el.innerText = `${item.id}. ${item.user}`;
+                el.onclick = () => openRepoDetail(item.id);
+                container.appendChild(el);
+            });
+        }
+
+        function openRepoDetail(id) {
+            const item = mockRepoData.find(x => x.id === id);
+            if (!item) return;
+
+            deactivateAllViews();
+            document.getElementById('view-repo-detail').classList.add('active');
+
+            document.getElementById('detail-title').innerText = item.title;
+            document.getElementById('detail-author').innerText = item.artist;
+            document.getElementById('detail-topics').innerText = item.topics;
+            
+            const linkEl = document.getElementById('detail-original-link');
+            linkEl.href = item.originalUrl;
+            linkEl.innerText = item.originalUrl;
+
+            document.getElementById('detail-desc').innerText = item.desc ? `Nota de autoría: "${item.desc}"` : "";
+            document.getElementById('detail-preview-container').innerHTML = `<img src="${item.img}" alt="${item.title}">`;
+        }
+
+        function selectRandomRepoItem() {
+            const randomId = Math.floor(Math.random() * mockRepoData.length) + 1;
+            openRepoDetail(randomId);
+        }
+
+        // Carga inicial al levantar la aplicación
+        window.onload = () => {
+            initRepositoryGrid();
+            openHome();
+        }
+    </script>
+</body>
+</html>
