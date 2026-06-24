@@ -340,6 +340,14 @@
         .repo-detail-preview img {
             max-width: 100%;
             height: auto;
+            cursor: zoom-in;
+            transition: transform 0.2s;
+        }
+
+        .repo-detail-preview img.zoomed {
+            cursor: zoom-out;
+            transform: scale(1.8);
+            max-height: 90vh;
         }
 
         /* Paneles Modales y Desplegables (Derecha/Centro) */
@@ -424,6 +432,12 @@
             font-size: 0.8rem;
             display: block;
             margin-top: 2px;
+        }
+
+        .resources-list .resource-link {
+            color: var(--text);
+            text-decoration: underline;
+            font-weight: bold;
         }
 
         .modal-content h3 {
@@ -575,15 +589,15 @@
             <span class="panel-close" style="color: var(--text);" onclick="toggleResourcesModal(false)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg></span>
             <h3>Recursos</h3>
             <ul class="resources-list">
-                <li><span><strong>Archive.org</strong> <span class="resource-desc">Piezas base (imágenes, textos, videos, sonidos). 🔗</span></span></li>
-                <li><span><strong>Pixelbuddha</strong> <span class="resource-desc">Fuentes, efectos, gráficos y pinceles gratis. 🔗</span></span></li>
-                <li><span><strong>Copychar.cc</strong> <span class="resource-desc">Copiar y pegar caracteres especiales. 🔗</span></span></li>
-                <li><span><strong>Texturelabs.org</strong> <span class="resource-desc">Base gigante de texturas gratuitas. 🔗</span></span></li>
-                <li><span><strong>Vecteezy</strong> <span class="resource-desc">Vectores y recursos gráficos limpios. 🔗</span></span></li>
-                <li><span><strong>Pixabay</strong> <span class="resource-desc">Videos, fotografías y música libre. 🔗</span></span></li>
-                <li><span><strong>Free Music Archive</strong> <span class="resource-desc">Recursos sonoros independientes. 🔗</span></span></li>
-                <li><span><strong>Bensound</strong> <span class="resource-desc">Música libre de derechos para videos. 🔗</span></span></li>
-                <li><span><strong>FreeSFX</strong> <span class="resource-desc">Efectos de sonido e impactos de audio sfx. 🔗</span></span></li>
+                <li><span><a href="https://archive.org/" target="_blank" class="resource-link">Archive.org</a> <span class="resource-desc">Piezas base (imágenes, textos, videos, sonidos).</span></span></li>
+                <li><span><a href="https://pixelbuddha.net/" target="_blank" class="resource-link">Pixelbuddha</a> <span class="resource-desc">Fuentes, efectos, gráficos y pinceles gratis.</span></span></li>
+                <li><span><a href="https://copychar.cc/" target="_blank" class="resource-link">Copychar.cc</a> <span class="resource-desc">Copiar y pegar caracteres especiales.</span></span></li>
+                <li><span><a href="https://texturelabs.org/" target="_blank" class="resource-link">Texturelabs.org</a> <span class="resource-desc">Base gigante de texturas gratuitas.</span></span></li>
+                <li><span><a href="https://es.vecteezy.com/" target="_blank" class="resource-link">Vecteezy</a> <span class="resource-desc">Vectores y recursos gráficos limpios.</span></span></li>
+                <li><span><a href="https://pixabay.com/" target="_blank" class="resource-link">Pixabay</a> <span class="resource-desc">Videos, fotografías y música libre.</span></span></li>
+                <li><span><a href="https://freemusicarchive.org/home" target="_blank" class="resource-link">Free Music Archive</a> <span class="resource-desc">Recursos sonoros independientes.</span></span></li>
+                <li><span><a href="https://www.bensound.com/free-music-for-videos" target="_blank" class="resource-link">Bensound</a> <span class="resource-desc">Música libre de derechos para videos.</span></span></li>
+                <li><span><a href="https://freesfx.co.uk/" target="_blank" class="resource-link">FreeSFX</a> <span class="resource-desc">Efectos de sonido e impactos de audio sfx.</span></span></li>
             </ul>
         </div>
     </div>
@@ -868,7 +882,7 @@ Jardín Digital — anti‑copyright, colaborativo, abierto.`;
             linkEl.innerText = item.originalUrl;
 
             document.getElementById('detail-desc').innerText = item.desc ? `Nota de autoría: "${item.desc}"` : "";
-            document.getElementById('detail-preview-container').innerHTML = `<img src="${item.img}" alt="${item.title}">`;
+            document.getElementById('detail-preview-container').innerHTML = `<img src="${item.img}" alt="${item.title}" onclick="toggleZoom(this)">`;
         }
 
         function selectRandomRepoItem() {
